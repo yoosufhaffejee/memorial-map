@@ -1,5 +1,5 @@
 // Your Google Sheets API key
-const API_KEY = 'AIzaSyDJfDniGvYhACNUbgjQWV2cAyvgz2oAYlg';  // Replace with your actual API Key
+const ABC = 'AIzaSyDJfDniGvYhACNUbgjQWV2cAyvgz2oAYlg';  // Replace with your actual API Key
 
 // The ID of the Google Sheets document you want to read/write
 const SHEET_ID = '1sKMmufs5sU_FAvLXkwfmBJEXLWZMalXPzio3rNXhByA';  // Replace with your Sheet ID
@@ -24,7 +24,7 @@ function fetchDataAndRender() {
 function fetchDataFromSheet() {
     const range = 'Sheet1!A2:E';  // Adjust this range according to your sheet layout
 
-    return fetch(`${BASE_URL}/values/${range}?key=${API_KEY}`)
+    return fetch(`${BASE_URL}/values/${range}?key=${ABC}`)
         .then(response => response.json())
         .then(data => {
             const rows = data.values;
@@ -119,7 +119,7 @@ function updateGraveInSheet(graveId, updatedGrave) {
         values: values,
     };
 
-    fetch(`${BASE_URL}/values/${range}?valueInputOption=RAW&key=${API_KEY}`, {
+    fetch(`${BASE_URL}/values/${range}?valueInputOption=RAW&key=${ABC}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

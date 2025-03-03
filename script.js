@@ -7,7 +7,7 @@ const graves = [
 ];
 
 const CLIENT_ID = '759665749389-9vib7mh27gt0v1cravkvbd8u02b8qo1c.apps.googleusercontent.com';  // Replace with your OAuth 2.0 Client ID
-const API_KEY = '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';  // Replace with your API key
+const ABC = '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';  // Replace with your API key
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';  // The scope needed for read/write access
 const SHEET_ID = '1sKMmufs5sU_FAvLXkwfmBJEXLWZMalXPzio3rNXhByA';  // Replace with your Google Sheets ID
 
@@ -102,7 +102,7 @@ function updateGraveInSheet(graveId, updatedGrave) {
 
 // Load the Google Sheets API client
 function loadClient() {
-    gapi.client.setApiKey(API_KEY);
+    gapi.client.setApiKey(ABC);
     gapi.client.load('https://sheets.googleapis.com/$discovery/rest?version=v4')
         .then(() => console.log('Google Sheets API loaded successfully'))
         .catch(err => console.error('Error loading Google Sheets API:', err));
