@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const idElement = document.createElement('div');
             idElement.className = 'plot-attachment';
-            idElement.textContent = grave.id;
+            idElement.textContent = grave.id  + ':';
 
             const nameElement = document.createElement('div');
             nameElement.className = 'grave-name';
