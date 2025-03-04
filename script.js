@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Generate random vegetation
     function generateRandomVegetation() {
-        debugger;
         // Clear existing random vegetation
         const existingTrees = document.querySelectorAll('.tree');
         const existingShrubs = document.querySelectorAll('.shrub');
