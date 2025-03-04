@@ -3,50 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>MemorialMap</title>
+    <title>Koster Muslim Cemetery</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <!-- Add this script to the <head> section to load Google API client and auth2 -->
-<script src="https://apis.google.com/js/platform.js"></script> <!-- Add this to load gapi.auth2 -->
-
+    <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 <body>
     <header>
-        <h1>MemorialMap</h1>
-        <p>Track cemetery graves and view details.</p>
+        <div class="header-content">
+            <div class="logo">Koster Muslim Cemetery</div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <!-- Graveyard Grid -->
-        <section id="graveyard-grid" class="graveyard-grid"></section>
+        <h1 class="page-title">Cemetery Map</h1>
+
+        <div class="auth-container">
+            <button id="auth-btn" class="btn btn-primary">Authenticate with Google</button>
+            <div id="output-div" class="status-message">Not authenticated. Please authenticate to edit graves.</div>
+        </div>
+
+        <div class="vegetation-controls">
+            <h3>Vegetation Controls</h3>
+            <div class="vegetation-slider">
+                <label for="tree-density">Tree Density:</label>
+                <input type="range" id="tree-density" min="0" max="25" value="7">
+                <span id="tree-density-value">7%</span>
+            </div>
+            <div class="vegetation-slider">
+                <label for="shrub-density">Shrub Density:</label>
+                <input type="range" id="shrub-density" min="0" max="25" value="5">
+                <span id="shrub-density-value">5%</span>
+            </div>
+            <button id="generate-vegetation" class="btn btn-primary">Generate Random Vegetation</button>
+        </div>
+
+        <div class="cemetery-layout">
+            <div class="controls">
+                <div class="search-filter">
+                    <input type="text" id="search-input" placeholder="Search by name or plot attachment">
+                    <select id="column-filter">
+                        <option value="">All Columns</option>
+                        <option value="A">Column A</option>
+                        <option value="B">Column B</option>
+                        <option value="C">Column C</option>
+                        <option value="D">Column D</option>
+                        <option value="E">Column E</option>
+                    </select>
+                    <button class="btn btn-secondary" id="search-btn">Search</button>
+                </div>
+            </div>
+
+            <div class="cemetery-map-container">
+                <div class="cemetery-map" id="cemetery-map">
+                    <div class="graves-container" id="graves-container">
+                        <!-- Graves will be dynamically added here -->
+                        
+                        <!-- Column labels moved to the top -->
+                        <div class="column-label" style="left: 100px;">A</div>
+                        <div class="column-label" style="left: 300px;">B</div>
+                        <div class="column-label" style="left: 500px;">C</div>
+                        <div class="column-label" style="left: 700px;">D</div>
+                        <div class="column-label" style="left: 900px;">E</div>
+                        
+                        <!-- Row labels on the left -->
+                        <div class="row-label" style="top: 100px;">1</div>
+                        <div class="row-label" style="top: 200px;">2</div>
+                        <div class="row-label" style="top: 300px;">3</div>
+                        <div class="row-label" style="top: 400px;">4</div>
+                        <div class="row-label" style="top: 500px;">5</div>
+                        <div class="row-label" style="top: 600px;">6</div>
+                        
+                        <!-- Trees and shrubs will be dynamically added here -->
+                    </div>
+                    <div class="cemetery-entrance">Cemetery Entrance</div>
+                    <div class="map-controls">
+                        <button class="map-control-btn" id="zoom-in">+</button>
+                        <button class="map-control-btn" id="zoom-out">-</button>
+                        <button class="map-control-btn" id="reset-view">⟲</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- Modal for Editing Grave Details -->
-    <div id="edit-modal" class="modal">
-        <div class="modal-content">
-            <h2>Edit Grave Details</h2>
-            <form id="edit-form">
-                <label for="name">Name:</label>
-                <input type="text" id="name" required><br>
-
-                <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" required><br>
-
-                <label for="dod">Date of Death:</label>
-                <input type="date" id="dod" required><br>
-
-                <label for="burial-date">Burial Date:</label>
-                <input type="date" id="burial-date" required><br>
-
-                <label for="plot">Plot Location:</label>
-                <input type="text" id="plot" required><br>
-
-                <button type="submit">Save</button>
-                <button type="button" id="cancel-btn">Cancel</button>
-            </form>
+    <!-- Grave Details Modal -->
+    <div class="modal" id="grave-modal">
+        <div class="modal-content view-mode">
+            <button class="close-modal">&times;</button>
+            <div class="modal-header">
+                <h3>Grave Details: <span id="modal-grave-id">A1</span></h3>
+            </div>
+            <div class="grave-details">
+                <div class="detail-group">
+                    <label>Full Name</label>
+                    <p class="detail-value" id="detail-name">-</p>
+                    <input type="text" class="detail-input" id="input-name">
+                </div>
+                <div class="detail-group">
+                    <label>Demise Date</label>
+                    <p class="detail-value" id="detail-date">-</p>
+                    <input type="date" class="detail-input" id="input-date">
+                </div>
+                <div class="detail-group">
+                    <label>Age</label>
+                    <p class="detail-value" id="detail-age">-</p>
+                    <input type="number" class="detail-input" id="input-age" min="0" max="150">
+                </div>
+                <div class="detail-group">
+                    <label>Gender</label>
+                    <p class="detail-value" id="detail-gender">-</p>
+                    <select class="detail-input" id="input-gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="detail-group">
+                    <label>Place of Origin</label>
+                    <p class="detail-value" id="detail-origin">-</p>
+                    <input type="text" class="detail-input" id="input-origin">
+                </div>
+                <div class="detail-group">
+                    <label>Notes</label>
+                    <p class="detail-value" id="detail-notes">-</p>
+                    <textarea class="detail-input" id="input-notes"></textarea>
+                </div>
+                <!-- Map preview for edit mode -->
+                <div class="detail-group full-width edit-mode-btn">
+                    <label>Position (Drag marker to adjust position)</label>
+                    <div class="map-preview" id="edit-map-preview">
+                        <!-- Preview map for positioning -->
+                        <div class="map-preview-marker" id="edit-map-preview-marker"></div>
+                    </div>
+                </div>
+                <!-- Position fields -->
+                <div class="detail-group edit-mode-btn">
+                    <label>Position X (px)</label>
+                    <p class="detail-value" id="detail-x">-</p>
+                    <input type="number" class="detail-input" id="input-x">
+                </div>
+                <div class="detail-group edit-mode-btn">
+                    <label>Position Y (px)</label>
+                    <p class="detail-value" id="detail-y">-</p>
+                    <input type="number" class="detail-input" id="input-y">
+                </div>
+                <div class="detail-group edit-mode-btn">
+                    <label>Rotation (degrees)</label>
+                    <p class="detail-value" id="detail-rotation">-</p>
+                    <input type="number" class="detail-input" id="input-rotation">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary view-mode-btn" id="edit-btn">Edit</button>
+                <button class="btn btn-primary edit-mode-btn" id="save-btn">Save Changes</button>
+                <button class="btn btn-secondary edit-mode-btn" id="cancel-btn">Cancel</button>
+                <button class="btn btn-danger" id="delete-btn" disabled>Delete</button>
+            </div>
         </div>
     </div>
+
+    <!-- Add New Grave Modal -->
+    <div class="modal" id="add-grave-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div class="modal-header">
+                <h3>Add New Grave</h3>
+            </div>
+            <div class="grave-details">
+                <div class="detail-group">
+                    <label>Plot Attachment</label>
+                    <input type="text" id="new-grave-id" placeholder="e.g., A10">
+                </div>
+                <div class="detail-group full-width">
+                    <label>Position (Click on the map to set position)</label>
+                    <div class="map-preview" id="map-preview">
+                        <!-- Preview map for positioning -->
+                        <div class="map-preview-marker" id="map-preview-marker"></div>
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <label>Position X (px)</label>
+                    <input type="number" id="new-grave-x" placeholder="X position">
+                </div>
+                <div class="detail-group">
+                    <label>Position Y (px)</label>
+                    <input type="number" id="new-grave-y" placeholder="Y position">
+                </div>
+                <div class="detail-group">
+                    <label>Rotation (degrees)</label>
+                    <input type="number" id="new-grave-rotation" placeholder="0" value="0">
+                </div>
+                <div class="detail-group">
+                    <label>Full Name</label>
+                    <input type="text" id="new-name">
+                </div>
+                <div class="detail-group">
+                    <label>Demise Date</label>
+                    <input type="date" id="new-date">
+                </div>
+                <div class="detail-group">
+                    <label>Age</label>
+                    <input type="number" id="new-age" min="0" max="150">
+                </div>
+                <div class="detail-group">
+                    <label>Gender</label>
+                    <select id="new-gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="detail-group">
+                    <label>Place of Origin</label>
+                    <input type="text" id="new-origin">
+                </div>
+                <div class="detail-group">
+                    <label>Notes</label>
+                    <textarea id="new-notes"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="add-grave-save-btn">Add Grave</button>
+                <button class="btn btn-secondary" id="add-grave-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="add-grave-btn" id="add-grave-btn">+</div>
+
+    <footer>
+        <p>&copy; 2025 KMJ. All rights reserved.</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
